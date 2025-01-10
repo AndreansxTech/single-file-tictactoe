@@ -3,94 +3,72 @@
 <head>
     <title>Tic Tac Toe</title>
     <style>
-        :root {
-            --cell-size: 100px;
-            --mark-size: calc(var(--cell-size) * 0.8);
+        :root[data-theme="light"] {
+            --background-color: #f0f0f0;
+            --text-color: #333;
+            --board-background: #fff;
+            --cell-border: #333;
+            --cell-hover: #eee;
+            --winner-background: #90EE90;
+            --button-background: #4CAF50;
+            --button-color: white;
+            --button-hover: #45a049;
         }
-        
+
+        :root[data-theme="dark"] {
+            --background-color: #222;
+            --text-color: #fff;
+            --board-background: #333;
+            --cell-border: #666;
+            --cell-hover: #444;
+            --winner-background: #2e7d32;
+            --button-background: #388E3C;
+            --button-color: white;
+            --button-hover: #1B5E20;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f0f0f0;
+            background-color: var(--background-color);
+            color: var(--text-color);
         }
 
         .game-container {
-            display: grid;
-            grid-template-columns: repeat(3, auto);
-            gap: 10px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: var(--board-background);
         }
 
         .cell {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            border: 2px solid #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 50px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            border-color: var(--cell-border);
         }
 
         .cell:hover {
-            background-color: #eee;
+            background-color: var(--cell-hover);
         }
 
         .cell.winner {
-            background-color: #90EE90;
-        }
-
-        .score-board {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-            font-size: 24px;
-        }
-
-        .status {
-            margin: 20px 0;
-            font-size: 24px;
+            background-color: var(--winner-background);
         }
 
         button {
-            padding: 10px 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            background-color: var(--button-background);
+            color: var(--button-color);
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: var(--button-hover);
         }
 
-        .cell.X::before {
-            content: 'X';
-            animation: fadeIn 0.3s;
-        }
-
-        .cell.O::before {
-            content: 'O';
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.5); }
-            to { opacity: 1; transform: scale(1); }
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <h1>Tic Tac Toe</h1>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
     <div class="score-board">
         <div>Player X: <span id="scoreX">0</span></div>
         <div>Player O: <span id="scoreO">0</span></div>
@@ -110,6 +88,20 @@
     <button onclick="resetGame()">Reset Game</button>
 
     <script>
+	function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
         const cells = document.querySelectorAll('[data-cell]');
         const status = document.getElementById('status');
         const scoreX = document.getElementById('scoreX');
