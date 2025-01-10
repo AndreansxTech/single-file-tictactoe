@@ -1,216 +1,142 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Kółko i Krzyżyk</title>
+    <title>Tic - tac - toe !</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        light: {
+                            bg: '#f0f0f0',
+                            text: '#333',
+                            board: '#fff',
+                            cell: '#333',
+                            winner: '#90EE90'
+                        },
+                        dark: {
+                            bg: '#222',
+                            text: '#fff',
+                            board: '#333',
+                            cell: '#666',
+                            winner: '#2e7d32'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Zmienne dla jasnego motywu */
-        :root[data-theme="light"] {
-            --bg-color: #f0f0f0;
-            --text-color: #333;
-            --board-bg: #fff;
-            --cell-border: #333;
-            --cell-hover: #f5f5f5;
-            --winner-bg: #90EE90;
-            --button-bg: #4CAF50;
-            --button-color: white;
-            --button-hover: #45a049;
-        }
-    
-        /* Zmienne dla ciemnego motywu */
-        :root[data-theme="dark"] {
-            --bg-color: #222;
-            --text-color: #fff;
-            --board-bg: #333;
-            --cell-border: #666;
-            --cell-hover: #444;
-            --winner-bg: #2e7d32;
-            --button-bg: #388E3C;
-            --button-color: white;
-            --button-hover: #1B5E20;
-        }
-    
-        /* Zastosowanie zmiennych */
-        body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-family: Arial, sans-serif;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        transition: all 0.3s ease;
-    }
-
-    .game-container {
-        display: grid;
-        grid-template-columns: repeat(3, 100px);
-        gap: 5px;
-        background: var(--board-bg);
-        padding: 10px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        margin: 20px 0;
-    }
-
-    .cell {
-        width: 100px;
-        height: 100px;
-        border: 2px solid var(--cell-border);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 40px;
-        cursor: pointer;
-        background: var(--board-bg);
-        color: var(--text-color);
-        transition: background-color 0.2s;
-    }
-
-    .score-board {
-        display: flex;
-        gap: 20px;
-        font-size: 20px;
-        margin-bottom: 20px;
-    }
-
-    #status {
-        font-size: 24px;
-        margin: 20px 0;
-        font-weight: bold;
-    }
-
-    button {
-        padding: 10px 20px;
-        font-size: 16px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        background-color: var(--button-bg);
-        color: var(--button-color);
-        transition: background-color 0.3s;
-    }
-    
-        /* Style przełącznika motywów */
-        .theme-switcher {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-    
-        .theme-button {
-            padding: 8px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-    
-        .theme-button:hover {
-            transform: scale(1.1);
-        }
+        
         @keyframes winPulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.1); opacity: 0.8; }
-        100% { transform: scale(1); opacity: 1; }
-    }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
-    @keyframes confetti {
-        0% { transform: translateY(0) rotate(0); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-    }
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
 
-    .cell.winner {
-        animation: winPulse 1s ease infinite;
-        background-color: var(--winner-bg);
-    }
+        .cell.winner {
+            animation: winPulse 1s ease infinite;
+        }
 
-    .confetti-piece {
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        background: #ff0;
-        animation: confetti 3s ease-out forwards;
-    }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti 3s ease-out forwards;
+        }
     </style>
 </head>
-<body>
-    <div class="score-board">
-        <div>Player X: <span id="scoreX">0</span></div>
-        <div>Player O: <span id="scoreO">0</span></div>
-    </div>
-    
-    <div id="status">X move</div>
-    
-    <div class="game-container">
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
+<body class="min-h-screen flex flex-col items-center bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text p-5 transition-colors duration-300">
+    <!-- start screen -->
+    <div id="startScreen" class="flex flex-col items-center justify-center h-screen">
+        <h1 class="text-4xl font-bold mb-8">Kółko i Krzyżyk</h1>
+        <button id="startButton" class="px-8 py-4 bg-light-board dark:bg-dark-board rounded-lg shadow-lg hover:opacity-80 transition-all transform hover:scale-105 text-xl">
+            Rozpocznij grę
+        </button>
     </div>
 
-    <button onclick="resetGame()">Game reset</button>
-<div class="theme-switcher">
-    <button class="theme-button" onclick="setTheme('light')">☀️</button>
-    <button class="theme-button" onclick="setTheme('dark')">🌙</button>
-</div>
-    <script>
-
-	function createConfetti() {
-        const colors = ['#ff0', '#f0f', '#0ff', '#0f0'];
-        for(let i = 0; i < 50; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti-piece';
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.animationDelay = Math.random() * 3 + 's';
-            document.body.appendChild(confetti);
-            
-            
-            setTimeout(() => confetti.remove(), 3000);
-        }
-    }
-        function setTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    }
-
-    // Inicjalizacja motywu
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-
-        const cells = document.querySelectorAll('[data-cell]');
-        const status = document.getElementById('status');
-        const scoreX = document.getElementById('scoreX');
-        const scoreO = document.getElementById('scoreO');
-        let scores = { X: 0, O: 0 };
+    <!-- Hidden game content -->
+    <div id="gameContent" class="hidden flex flex-col items-center w-full">
+        <div class="flex gap-5 text-xl mb-5">
+            <div>Gracz X: <span id="scoreX" class="font-bold">0</span></div>
+            <div>Gracz O: <span id="scoreO" class="font-bold">0</span></div>
+        </div>
         
-        let currentPlayer = 'X';
-        let gameState = ['', '', '', '', '', '', '', '', ''];
-        let gameActive = true;
+        <div id="status" class="text-2xl font-bold mb-5">Ruch gracza X</div>
+        
+        <div class="game-container grid grid-cols-3 gap-1 bg-light-board dark:bg-dark-board p-2 rounded-lg shadow-lg">
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+        </div>
 
-        const winningConditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]
-        ];
+        <button onclick="resetGame()" class="mt-5 px-5 py-2 bg-light-board dark:bg-dark-board rounded-lg shadow hover:opacity-80 transition-opacity">Reset gry</button>
 
-        const clickSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
+        
+        <div class="fixed top-5 right-5 flex gap-2">
+            <button class="theme-button p-2 rounded-full bg-light-board dark:bg-dark-board text-2xl hover:scale-110 transition-transform" onclick="setTheme('light')">☀️</button>
+            <button class="theme-button p-2 rounded-full bg-light-board dark:bg-dark-board text-2xl hover:scale-110 transition-transform" onclick="setTheme('dark')">🌙</button>
+        </div>
+    </div>
 
-        cells.forEach((cell, index) => {
-            cell.addEventListener('click', () => handleCellClick(cell, index));
+    <!-- Zachowujemy istniejący skrypt bez zmian -->
+    <script>
+    //constst
+    const startScreen = document.getElementById('startScreen');
+    const gameContent = document.getElementById('gameContent');
+    const startButton = document.getElementById('startButton');
+    const cells = document.querySelectorAll('[data-cell]');
+    const status = document.getElementById('status');
+    const scoreX = document.getElementById('scoreX');
+    const scoreO = document.getElementById('scoreO');
+    
+    //stat
+    let scores = { X: 0, O: 0 };
+    let currentPlayer = 'X';
+    let gameState = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+
+    const winningConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+    ];
+
+    const clickSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
+
+    // Event Listeners
+    startButton.addEventListener('click', () => {
+        startScreen.classList.add('hidden');
+        gameContent.classList.remove('hidden');
+        resetGame();
+    });
+
+    cells.forEach((cell, index) => {
+        cell.addEventListener('click', () => handleCellClick(cell, index));
+    });
+
+    // Funkcje gry
+    function checkWin() {
+        return winningConditions.some(condition => {
+            return condition.every(index => gameState[index] === currentPlayer);
         });
+    }
 
-        function handleWin() {
-        status.textContent = `Gracz ${currentPlayer} wygrywa!`;
+    function handleWin() {
+        status.textContent = `Player ${currentPlayer} won !`;
         scores[currentPlayer]++;
         updateScores();
         highlightWinningCombination();
@@ -232,59 +158,80 @@
         }
 
         if (checkDraw()) {
-            status.textContent = "tie !";
+            status.textContent = "It`s a tie !";
             gameActive = false;
             return;
         }
 
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        status.textContent = `Ruch gracza ${currentPlayer}`;
+        status.textContent = `Now is player ${currentPlayer} move`;
     }
 
-        function highlightWinningCombination() {
-            winningConditions.forEach(condition => {
-                if (condition.every(index => gameState[index] === currentPlayer)) {
-                    condition.forEach(index => {
-                        cells[index].classList.add('winner');
-                    });
-                }
-            });
-        }
-
-        function checkDraw() {
-            return gameState.every(cell => cell !== '');
-        }
-
-        function updateScores() {
-            scoreX.textContent = scores.X;
-            scoreO.textContent = scores.O;
-        }
-
-        function resetGame() {
-            currentPlayer = 'X';
-            gameState = ['', '', '', '', '', '', '', '', ''];
-            gameActive = true;
-            status.textContent = `Player ${currentPlayer} move`;
-            cells.forEach(cell => {
-                cell.textContent = '';
-                cell.classList.remove('X', 'O', 'winner');
-            });
-        }
-
-    function checkWin() {
-        return winningConditions.some(condition => {
-            return condition.every(index => {
-                return gameState[index] === currentPlayer;
-            });
+    function highlightWinningCombination() {
+        winningConditions.forEach(condition => {
+            if (condition.every(index => gameState[index] === currentPlayer)) {
+                condition.forEach(index => {
+                    cells[index].classList.add('winner');
+                });
+            }
         });
     }
 
-    cells.forEach((cell, index) => {
-        cell.addEventListener('click', () => handleCellClick(cell, index));
-    });
+    function checkDraw() {
+        return gameState.every(cell => cell !== '');
+    }
 
-    //Initialize gamae
-    resetGame();
+    function updateScores() {
+        scoreX.textContent = scores.X;
+        scoreO.textContent = scores.O;
+    }
+
+    function resetGame() {
+        currentPlayer = 'X';
+        gameState = ['', '', '', '', '', '', '', '', ''];
+        gameActive = true;
+        status.textContent = `Now is player ${currentPlayer} move`;
+        cells.forEach(cell => {
+            cell.textContent = '';
+            cell.classList.remove('X', 'O', 'winner');
+        });
+        scores = { X: 0, O: 0 };
+        updateScores();
+    }
+
+    function createConfetti() {
+        const colors = ['#ff0', '#f0f', '#0ff', '#0f0'];
+        for(let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti-piece';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 3 + 's';
+            document.body.appendChild(confetti);
+            
+            
+            setTimeout(() => confetti.remove(), 3000);
+        }
+    }
+
+    function setTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        localStorage.setItem('theme', theme);
+    }
+
+    //theme intit
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
     </script>
 </body>
 </html>
