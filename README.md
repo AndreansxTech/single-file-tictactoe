@@ -14,6 +14,9 @@ A modern, responsive implementation of the classic Tic-tac-toe game built using 
 - 📱 Responsive design
 - 🤖Play against an AI
 
+## Preview
+
+  
 ## How to Play
 
 1. Open the `index.html` file in any modern web browser
