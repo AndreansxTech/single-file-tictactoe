@@ -51,9 +51,110 @@
             height: 10px;
             animation: confetti 3s ease-out forwards;
         }
+
+        :root {
+            /* Light Theme */
+            --light-bg: #EB5A3C;
+            --light-text: #DF9755;
+            --light-board: #E7D283;
+            --light-hover: #EDF4C2;
+            
+            /* Dark Theme */
+            --dark-bg: #2e3440;
+            --dark-text: #4c566a;
+            --dark-board: #434c5e;
+            --dark-hover: #3b4252;
+            
+            /* Ocean Theme */
+            --ocean-bg: #2e3440;
+            --ocean-text: #3b4252;
+            --ocean-board: #434c5e;
+            --ocean-hover: #4c566a;
+            
+            /* Forest Theme */
+            --forest-bg: #2e3440;
+            --forest-text: #3b4252;
+            --forest-board: #434c5e;
+            --forest-hover: #4c566a;
+            
+            /* Sunset Theme */
+            --sunset-bg: #441752;
+            --sunset-text: #441752;
+            --sunset-board: #A888B5;
+            --sunset-hover: #EFB6C8;
+
+            /* Neon Theme */
+            --neon-bg: #2e3440;
+            --neon-text: #3b4252;
+            --neon-board: #434c5e;
+            --neon-hover: #4c566a;
+        }
+
+        /* Theme Transitions */
+        body {
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .cell {
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+        }
+
+        /* Theme Classes */
+        body.theme-sunset {
+            background-color: var(--sunset-bg);
+            color: var(--sunset-text);
+        }
+
+        .theme-sunset .cell {
+            background-color: var(--sunset-board);
+            color: var(--sunset-text);
+        }
+
+        .theme-sunset .cell:hover {
+            background-color: var(--sunset-hover);
+        }
+
+        /* Existing Tailwind-based classes (light/dark) */
+        :root {
+            --bg-light: #ffffff;
+            --text-light: #333333;
+            --bg-dark: #222222;
+            --text-dark: #ffffff;
+        }
+
+        /* Define extra theme classes */
+        .theme-light {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .theme-dark {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Example additional theme (ocean) */
+        .theme-ocean {
+            background-color: #1a2b3c;
+            color: #e0f2ff;
+        }
+
+        .theme-light {
+            background-color: var(--light-bg);
+            color: var(--light-text);
+        }
+
+        .theme-light .cell {
+            background-color: var(--light-board);
+            color: var(--light-text);
+        }
+
+        .theme-light .cell:hover {
+            background-color: var(--light-hover);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text p-5 transition-colors duration-300">
+<body class="theme-light min-h-screen flex flex-col items-center p-5 transition-colors duration-300">
     <!-- start screen -->
     <div id="startScreen" class="flex flex-col items-center justify-center h-screen">
         <h1 class="text-4xl font-bold mb-8">Tic Tac Toe !</h1>
@@ -91,12 +192,13 @@
         <div class="game-container bg-light-board dark:bg-dark-board p-2 rounded-lg shadow-lg">
         </div>
 
-        <button onclick="resetGame()" class="mt-5 px-5 py-2 bg-light-board dark:bg-dark-board rounded-lg shadow hover:opacity-80 transition-opacity">Reset gry</button>
+        <button onclick="resetGame()" class="mt-5 px-5 py-2 bg-light-board dark:bg-dark-board rounded-lg shadow hover:opacity-80 transition-opacity">Reset the game/button>
 
         
         <div class="fixed top-5 right-5 flex gap-2">
             <button class="theme-button p-2 rounded-full bg-light-board dark:bg-dark-board text-2xl hover:scale-110 transition-transform" onclick="setTheme('light')">☀️</button>
             <button class="theme-button p-2 rounded-full bg-light-board dark:bg-dark-board text-2xl hover:scale-110 transition-transform" onclick="setTheme('dark')">🌙</button>
+            <button class="theme-button p-2 rounded-full bg-light-board dark:bg-dark-board text-2xl hover:scale-110 transition-transform" onclick="setTheme('ocean')">🎨</button>
         </div>
     </div>
 
@@ -236,7 +338,7 @@
         
         if (gameMode === 'ai' && currentPlayer === 'O') {
             boardLocked = true;
-            status.textContent = "AI is thinking...";
+            status.textContent = "AI is brainstorming...";
             makeAiMove();
         }
     }
@@ -364,11 +466,11 @@
     }
 
     function setTheme(theme) {
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        // Remove any existing theme classes
+        document.body.classList.remove('theme-light', 'theme-dark', 'theme-ocean', 'theme-forest', 'theme-sunset', 'theme-neon');
+        // Add the new theme class
+        document.body.classList.add(`theme-${theme}`);
+        // Save preference
         localStorage.setItem('theme', theme);
     }
 
@@ -467,7 +569,7 @@
             container.appendChild(cell);
         }
         // Update the global cells after dynamically creating them
-        cells = document.qn; truerySelectorAll('[data-cell]');
+        cells = document.querySelectorAll('[data-cell]');
     }
 
     function generateWinningConditions() {
@@ -500,6 +602,22 @@
         }
         winningConditions.push(diagonal1, diagonal2);
     }
+    function updateThemeIcon(theme) {
+        const themeButton = document.querySelector('.theme-toggle');
+        const icons = {
+            'light': '☀️',
+            'dark': '🌙',
+            'sunset': '🌅'
+        };
+        themeButton.textContent = icons[theme];
+    }
+
+    // Initialize theme on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.classList.add(`theme-${savedTheme}`);
+        updateThemeIcon(savedTheme);
+    });
     </script>
 </body>
 </html>
