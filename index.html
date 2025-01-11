@@ -56,31 +56,39 @@
 <body class="min-h-screen flex flex-col items-center bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text p-5 transition-colors duration-300">
     <!-- start screen -->
     <div id="startScreen" class="flex flex-col items-center justify-center h-screen">
-        <h1 class="text-4xl font-bold mb-8">Kółko i Krzyżyk</h1>
+        <h1 class="text-4xl font-bold mb-8">Tic Tac Toe !</h1>
         <button id="startButton" class="px-8 py-4 bg-light-board dark:bg-dark-board rounded-lg shadow-lg hover:opacity-80 transition-all transform hover:scale-105 text-xl">
-            Rozpocznij grę
+            Start the epic tictactoe
         </button>
     </div>
 
     <!-- Hidden game content -->
     <div id="gameContent" class="hidden flex flex-col items-center w-full">
         <div class="flex gap-5 text-xl mb-5">
-            <div>Gracz X: <span id="scoreX" class="font-bold">0</span></div>
-            <div>Gracz O: <span id="scoreO" class="font-bold">0</span></div>
+            <div>Player X: <span id="scoreX" class="font-bold">0</span></div>
+            <div>Player O: <span id="scoreO" class="font-bold">0</span></div>
         </div>
         
-        <div id="status" class="text-2xl font-bold mb-5">Ruch gracza X</div>
+        <div id="status" class="text-2xl font-bold mb-5">Now is player X move</div>
         
-        <div class="game-container grid grid-cols-3 gap-1 bg-light-board dark:bg-dark-board p-2 rounded-lg shadow-lg">
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
-            <div class="cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors" data-cell></div>
+        <div class="flex gap-4 mb-5">
+            <select id="gameMode" class="px-4 py-2 rounded bg-light-board dark:bg-dark-board">
+                <option value="pvp">Player vs Player</option>
+                <option value="ai">Player vs AI</option>
+            </select>
+            <select id="aiDifficulty" class="px-4 py-2 rounded bg-light-board dark:bg-dark-board" disabled>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <select id="boardSize" class="px-4 py-2 rounded bg-light-board dark:bg-dark-board">
+                <option value="3">3x3</option>
+                <option value="4">4x4</option>
+                <option value="5">5x5</option>
+            </select>
+        </div>
+
+        <div class="game-container bg-light-board dark:bg-dark-board p-2 rounded-lg shadow-lg">
         </div>
 
         <button onclick="resetGame()" class="mt-5 px-5 py-2 bg-light-board dark:bg-dark-board rounded-lg shadow hover:opacity-80 transition-opacity">Reset gry</button>
@@ -92,13 +100,11 @@
         </div>
     </div>
 
-    <!-- Zachowujemy istniejący skrypt bez zmian -->
     <script>
     //constst
     const startScreen = document.getElementById('startScreen');
     const gameContent = document.getElementById('gameContent');
     const startButton = document.getElementById('startButton');
-    const cells = document.querySelectorAll('[data-cell]');
     const status = document.getElementById('status');
     const scoreX = document.getElementById('scoreX');
     const scoreO = document.getElementById('scoreO');
@@ -117,6 +123,14 @@
 
     const clickSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
 
+    // Add after existing constants
+    let gameMode = 'pvp';
+    let aiDifficulty = 'easy';
+    let boardSize = 3;
+
+    // Add new state variable after other game state declarations
+    let boardLocked = false;
+
     // Event Listeners
     startButton.addEventListener('click', () => {
         startScreen.classList.add('hidden');
@@ -124,15 +138,66 @@
         resetGame();
     });
 
-    cells.forEach((cell, index) => {
-        cell.addEventListener('click', () => handleCellClick(cell, index));
+    // Remove or comment out any global “const cells = document.querySelectorAll('[data-cell]');”
+    let cells; // keep it declared but uninitialized
+
+    // Add new event listeners after existing ones
+    document.getElementById('gameMode').addEventListener('change', (e) => {
+        gameMode = e.target.value;
+        document.getElementById('aiDifficulty').disabled = gameMode !== 'ai';
+        resetGame();  // Ensure we reset whenever gameMode changes
     });
 
-    // Funkcje gry
+    document.getElementById('aiDifficulty').addEventListener('change', (e) => {
+        aiDifficulty = e.target.value;
+    });
+
+    document.getElementById('boardSize').addEventListener('change', (e) => {
+        boardSize = parseInt(e.target.value);
+        resetGame();
+    });
+
     function checkWin() {
-        return winningConditions.some(condition => {
-            return condition.every(index => gameState[index] === currentPlayer);
-        });
+        // Get current board state as 2D array
+        let board = [];
+        for (let i = 0; i < boardSize; i++) {
+            board.push(gameState.slice(i * boardSize, (i + 1) * boardSize));
+        }
+
+        // Check rows
+        for (let row = 0; row < boardSize; row++) {
+            if (checkLine(board[row])) return true;
+        }
+
+        // Check columns
+        for (let col = 0; col < boardSize; col++) {
+            let column = board.map(row => row[col]);
+            if (checkLine(column)) return true;
+        }
+
+        // Check diagonals
+        let diagonal1 = [];
+        let diagonal2 = [];
+        for (let i = 0; i < boardSize; i++) {
+            diagonal1.push(board[i][i]);
+            diagonal2.push(board[i][boardSize - 1 - i]);
+        }
+        
+        return checkLine(diagonal1) || checkLine(diagonal2);
+    }
+
+    // Add helper function for checking lines
+    function checkLine(line) {
+        let count = 0;
+        for (let i = 0; i < line.length; i++) {
+            if (line[i] === currentPlayer) {
+                count++;
+                if (count === (boardSize >= 5 ? 4 : boardSize)) return true;
+            } else {
+                count = 0;
+            }
+        }
+        return false;
     }
 
     function handleWin() {
@@ -144,7 +209,10 @@
         gameActive = false;
     }
 
+    // Modify handleCellClick function
     function handleCellClick(cell, index) {
+        // Prevent moves when board is locked or if it's AI's turn
+        if (boardLocked || (gameMode === 'ai' && currentPlayer === 'O')) return;
         if (gameState[index] !== '' || !gameActive) return;
 
         clickSound.play();
@@ -158,23 +226,104 @@
         }
 
         if (checkDraw()) {
-            status.textContent = "It`s a tie !";
+            status.textContent = "It's a tie!";
             gameActive = false;
             return;
         }
 
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
         status.textContent = `Now is player ${currentPlayer} move`;
+        
+        if (gameMode === 'ai' && currentPlayer === 'O') {
+            boardLocked = true;
+            status.textContent = "AI is thinking...";
+            makeAiMove();
+        }
     }
 
+    // Update highlightWinningCombination function
     function highlightWinningCombination() {
-        winningConditions.forEach(condition => {
-            if (condition.every(index => gameState[index] === currentPlayer)) {
-                condition.forEach(index => {
-                    cells[index].classList.add('winner');
-                });
+        let board = Array(boardSize).fill().map((_, i) => 
+            gameState.slice(i * boardSize, (i + 1) * boardSize)
+        );
+
+        // Check rows
+        for (let i = 0; i < boardSize; i++) {
+            let streak = [];
+            for (let j = 0; j < boardSize; j++) {
+                if (board[i][j] === currentPlayer) {
+                    streak.push(i * boardSize + j);
+                    if (streak.length === getWinLength()) {
+                        highlightCells(streak);
+                        return;
+                    }
+                } else {
+                    streak = [];
+                }
             }
+        }
+
+        // Check columns
+        for (let j = 0; j < boardSize; j++) {
+            let streak = [];
+            for (let i = 0; i < boardSize; i++) {
+                if (board[i][j] === currentPlayer) {
+                    streak.push(i * boardSize + j);
+                    if (streak.length === getWinLength()) {
+                        highlightCells(streak);
+                        return;
+                    }
+                } else {
+                    streak = [];
+                }
+            }
+        }
+
+        // Check diagonals
+        checkDiagonals(board);
+    }
+
+    // Add helper functions
+    function getWinLength() {
+        return boardSize >= 5 ? 4 : boardSize;
+    }
+
+    function highlightCells(positions) {
+        positions.forEach(pos => {
+            const cell = document.querySelector(`[data-cell]:nth-child(${pos + 1})`);
+            cell.classList.add('winner');
         });
+    }
+
+    function checkDiagonals(board) {
+        // Check all possible diagonals
+        for (let i = 0; i < boardSize; i++) {
+            for (let j = 0; j < boardSize; j++) {
+                checkDiagonal(board, i, j, 1, 1);  // Main diagonal
+                checkDiagonal(board, i, j, 1, -1); // Anti-diagonal
+            }
+        }
+    }
+
+    function checkDiagonal(board, startRow, startCol, rowDir, colDir) {
+        let streak = [];
+        let row = startRow;
+        let col = startCol;
+        
+        while (row >= 0 && row < boardSize && col >= 0 && col < boardSize) {
+            if (board[row][col] === currentPlayer) {
+                streak.push(row * boardSize + col);
+                if (streak.length === getWinLength()) {
+                    highlightCells(streak);
+                    return true;
+                }
+            } else {
+                streak = [];
+            }
+            row += rowDir;
+            col += colDir;
+        }
+        return false;
     }
 
     function checkDraw() {
@@ -186,17 +335,17 @@
         scoreO.textContent = scores.O;
     }
 
+    // Modify resetGame function to include gameMode reset
     function resetGame() {
         currentPlayer = 'X';
-        gameState = ['', '', '', '', '', '', '', '', ''];
         gameActive = true;
+        initializeGame();
         status.textContent = `Now is player ${currentPlayer} move`;
-        cells.forEach(cell => {
-            cell.textContent = '';
-            cell.classList.remove('X', 'O', 'winner');
-        });
         scores = { X: 0, O: 0 };
         updateScores();
+        if (gameMode === 'ai' && currentPlayer === 'O') {
+            makeAiMove();
+        }
     }
 
     function createConfetti() {
@@ -223,6 +372,63 @@
         localStorage.setItem('theme', theme);
     }
 
+    // Update makeAiMove function
+    function makeAiMove() {
+        if (!gameActive || gameMode !== 'ai') return;
+        
+        setTimeout(() => {
+            let index;
+            if (aiDifficulty === 'hard') {
+                index = getBestMove();
+            } else if (aiDifficulty === 'medium') {
+                index = Math.random() > 0.5 ? getBestMove() : getRandomMove();
+            } else {
+                index = getRandomMove();
+            }
+
+            // Make sure “cells” references the updated board
+            const cell = cells[index];
+            if (cell) {
+                boardLocked = false;
+                gameState[index] = 'O';
+                cell.textContent = 'O';
+                cell.classList.add('O');
+
+                if (checkWin()) {
+                    handleWin();
+                    return;
+                }
+
+                if (checkDraw()) {
+                    status.textContent = "It's a tie!";
+                    gameActive = false;
+                    return;
+                }
+
+                currentPlayer = 'X';
+                status.textContent = "Now is player X move";
+            }
+        }, 500);
+    }
+
+    // Add getRandomMove function
+    function getRandomMove() {
+        const emptyCells = gameState
+            .map((cell, index) => cell === '' ? index : null)
+            .filter(cell => cell !== null);
+        return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    }
+
+    // Update getBestMove function
+    function getBestMove() {
+        const emptyCells = gameState
+            .map((cell, index) => cell === '' ? index : null)
+            .filter(cell => cell !== null);
+        
+        if (emptyCells.length === 0) return null;
+        return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    }
+
     //theme intit
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
@@ -231,6 +437,68 @@
         document.documentElement.classList.add('dark');
     } else {
         document.documentElement.classList.remove('dark');
+    }
+
+    // Initialize game on load
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeGame();
+    });
+
+    // Replace existing game state initialization
+    function initializeGame() {
+        gameState = Array(boardSize * boardSize).fill('');
+        createBoard();
+        generateWinningConditions();
+        boardLocked = false;
+    }
+
+    function createBoard() {
+        const container = document.querySelector('.game-container');
+        container.innerHTML = '';
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+        container.style.gap = '0.25rem';
+
+        for (let i = 0; i < boardSize * boardSize; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell w-24 h-24 flex items-center justify-center text-4xl cursor-pointer border-2 border-light-cell dark:border-dark-cell transition-colors';
+            cell.dataset.cell = '';
+            cell.addEventListener('click', () => handleCellClick(cell, i));
+            container.appendChild(cell);
+        }
+        // Update the global cells after dynamically creating them
+        cells = document.qn; truerySelectorAll('[data-cell]');
+    }
+
+    function generateWinningConditions() {
+        winningConditions = [];
+        
+        // Rows
+        for (let i = 0; i < boardSize; i++) {
+            const row = [];
+            for (let j = 0; j < boardSize; j++) {
+                row.push(i * boardSize + j);
+            }
+            winningConditions.push(row);
+        }
+        
+        // Columns
+        for (let i = 0; i < boardSize; i++) {
+            const col = [];
+            for (let j = 0; j < boardSize; j++) {
+                col.push(i + boardSize * j);
+            }
+            winningConditions.push(col);
+        }
+        
+        // Diagonals
+        const diagonal1 = [];
+        const diagonal2 = [];
+        for (let i = 0; i < boardSize; i++) {
+            diagonal1.push(i * (boardSize + 1));
+            diagonal2.push((i + 1) * (boardSize - 1));
+        }
+        winningConditions.push(diagonal1, diagonal2);
     }
     </script>
 </body>
