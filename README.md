@@ -14,7 +14,8 @@ A modern, responsive implementation of the classic Tic-tac-toe game built using 
 - 📱 Responsive design
 - 🤖Play against an AI
 
-## Preview
+## Screenshot
+![Screenshot](https://github.com/user-attachments/assets/b1ab1072-3564-4ea6-8a61-872c565b5329)
 
   
 ## How to Play
