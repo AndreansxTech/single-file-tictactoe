@@ -11,6 +11,7 @@ A modern, responsive implementation of the classic Tic-tac-toe game built using 
 - 🔊 Click sound feedback
 - 💾 Theme preference saved in local storage
 - 📱 Responsive design
+- Play against an AI
 
 ## How to Play
 
